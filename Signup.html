@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sizewise-Signup</title> 
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        h1, h2, h3, h4, h5, h6 { 
+            font-family: 'Inter', sans-serif; 
+            --font-sans: 'Inter'; 
+        }
+    </style>
+</head>
+<body>
+  
+
+<div class="mx-auto max-w-sm space-y-6">
+    <div class="space-y-2 text-center">
+        <h1 class="text-3xl font-bold">Sign Up</h1>
+        <p class="text-gray-500 dark:text-gray-400">Enter your information to create an account</p>
+    </div>
+    <div class="space-y-4">
+        <div class="space-y-2">
+            <label
+                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                for="username"
+            >
+                Username
+            </label>
+            <input
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                id="username"
+                placeholder="Enter your username"
+                required=""
+            />
+        </div>
+        <div class="space-y-2">
+            <label
+                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                for="dob"
+            >
+                Date of Birth
+            </label>
+            <input
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                id="dob"
+                placeholder="Enter your date of birth"
+                type="date"
+                required=""
+            />
+        </div>
+        
+        <div class="space-y-2">
+            <label
+                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                for="email"
+            >
+                Email
+            </label>
+            <input
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                id="email"
+                placeholder="Enter your email"
+                required=""
+            />
+        </div>
+        <div class="space-y-2">
+            <label
+                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                for="password"
+            >
+                Password
+            </label>
+            <input
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                id="password"
+                placeholder="Enter your password"
+                required=""
+                type="password"
+            />
+        </div>
+        <button
+            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full"
+            id="signup-btn"
+            type="submit"
+        >
+            Sign Up
+        </button>
+        <p class="text-gray-500 dark:text-gray-400 text-center">Already Have An Account?<a class="text-gray-500 dark:text-black" href="Signin.html"> Signin</a></p>
+    </div>
+</div>
+<script type="module">
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
+    
+    
+const firebaseConfig = {
+  apiKey: "AIzaSyBY2GQAwomxvtJ1rXhkdjTc4BA0uCI-msw",
+  authDomain: "fyp-717ba.firebaseapp.com",
+  projectId: "fyp-717ba",
+  storageBucket: "fyp-717ba.appspot.com",
+  messagingSenderId: "308095166739",
+  appId: "1:308095166739:web:025b3bcb63d681c82412e6",
+  measurementId: "G-XGT10JX58Y"
+ };
+
+  const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const signupForm = document.getElementById('signup-btn');
+
+    signupForm.addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const dob=document.getElementById("dob").value;
+
+        try {
+          
+            const hashedPassword = CryptoJS.SHA256(password).toString();
+
+            
+            await addDoc(collection(db, 'signup'), {
+                username: username,
+                email: email,
+                password: hashedPassword, 
+                dob:dob
+            });
+            alert('User signed up successfully!');
+        } catch (error) {
+            console.error('Error adding user: ', error);
+            alert('Error signing up user. Please try again.');
+        }
+    });
+</script>
+
+</body>
+</html>

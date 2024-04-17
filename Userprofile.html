@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title> 
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        h1, h2, h3, h4, h5, h6 { 
+            font-family: 'Inter', sans-serif; 
+            --font-sans: 'Inter'; 
+        }
+    </style>
+</head>
+<body>
+    <div class="mx-auto max-w-sm space-y-6">
+        <div class="space-y-2 text-center">
+            <h1 class="text-3xl font-bold">User Profile</h1>
+            <p class="text-gray-500 dark:text-gray-400">View and update your profile information</p>
+        </div>
+        <div class="space-y-4">
+            <div class="space-y-2">
+                <label class="text-sm font-medium leading-none">Username</label>
+                <p id="username" class="text-sm text-gray-800"></p>
+            </div>
+            <div class="space-y-2">
+                <label class="text-sm font-medium leading-none">Date of Birth</label>
+                <p id="dob" class="text-sm text-gray-800"></p>
+            </div>
+            <div class="space-y-2">
+                <label class="text-sm font-medium leading-none">Email</label>
+                <p id="email" class="text-sm text-gray-800"></p>
+            </div>
+            <div class="space-y-2">
+                <label for="profile-image" class="text-sm font-medium leading-none">Profile Image</label>
+                <input type="file" id="profile-image" accept="image/*" class="border rounded-md px-3 py-2">
+                <button id="upload-image-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Upload Image</button>
+            </div>
+            <div>
+                <img id="user-image" src="#" alt="Profile Image" class="hidden w-32 h-32 mx-auto rounded-full">
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        // Initialize Firebase
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBY2GQAwomxvtJ1rXhkdjTc4BA0uCI-msw",
+  authDomain: "fyp-717ba.firebaseapp.com",
+  projectId: "fyp-717ba",
+  storageBucket: "fyp-717ba.appspot.com",
+  messagingSenderId: "308095166739",
+  appId: "1:308095166739:web:025b3bcb63d681c82412e6",
+  measurementId: "G-XGT10JX58Y"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const displayUserProfile = () => {
+            const userSession = JSON.parse(localStorage.getItem('userSession'));
+            if (userSession) {
+                document.getElementById('username').textContent = userSession.username;
+                document.getElementById('email').textContent = userSession.email;
+                document.getElementById('dob').textContent = userSession.dob;
+            } else {
+                console.log('No user session found.');
+            }
+        };
+
+        const uploadImage = async (imageFile) => {
+            try {
+                const userSession = JSON.parse(localStorage.getItem('userSession'));
+                const userDocRef = doc(db, 'users', userSession.email);
+
+                // Upload image file to Firebase Storage
+                const storageRef = ref(storage, `profile_images/${userSession.email}/${imageFile.name}`);
+                await uploadBytes(storageRef, imageFile);
+
+                // Get download URL of the uploaded image
+                const downloadURL = await getDownloadURL(storageRef);
+
+                // Save download URL in Firestore
+                await setDoc(userDocRef, { profileImage: downloadURL }, { merge: true });
+
+                // Update user profile image element
+                document.getElementById('user-image').src = downloadURL;
+                document.getElementById('user-image').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                alert('Error uploading image. Please try again.');
+            }
+        };
+
+        document.getElementById('upload-image-btn').addEventListener('click', () => {
+            const imageFile = document.getElementById('profile-image').files[0];
+            if (imageFile) {
+                uploadImage(imageFile);
+            } else {
+                alert('Please select an image to upload.');
+            }
+        });
+
+        window.addEventListener('load', displayUserProfile);
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sizewise Signin</title> 
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        h1, h2, h3, h4, h5, h6 { 
+            font-family: 'Inter', sans-serif; 
+            --font-sans: 'Inter'; 
+        }
+    </style>
+</head>
+<body>
+  
+
+<div class="mx-auto max-w-sm space-y-6">
+    <div class="space-y-2 text-center">
+        <h1 class="text-3xl font-bold">Sign In</h1>
+        <p class="text-gray-500 dark:text-gray-400">Enter your credentials to sign in</p>
+    </div>
+    <div class="space-y-4">
+        <div class="space-y-2">
+            <label
+                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                for="email"
+            >
+                Email
+            </label>
+            <input
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                id="email"
+                placeholder="Enter your email"
+                required=""
+            />
+        </div>
+        <div class="space-y-2">
+            <label
+                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                for="password"
+            >
+                Password
+            </label>
+            <input
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                id="password"
+                placeholder="Enter your password"
+                required=""
+                type="password"
+            />
+        </div>
+        <button
+            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full"
+            id="signin-btn"
+            type="submit"
+        >
+            Sign In
+        </button>
+    </div>
+</div>
+<script type="module">
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBY2GQAwomxvtJ1rXhkdjTc4BA0uCI-msw",
+  authDomain: "fyp-717ba.firebaseapp.com",
+  projectId: "fyp-717ba",
+  storageBucket: "fyp-717ba.appspot.com",
+  messagingSenderId: "308095166739",
+  appId: "1:308095166739:web:025b3bcb63d681c82412e6",
+  measurementId: "G-XGT10JX58Y"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const signinForm = document.getElementById('signin-btn');
+    signinForm.addEventListener('click', async (event) => {
+        event.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const querySnapshot = await getDocs(query(collection(db, 'signup'), where('email', '==', email)));
+            if (querySnapshot.empty) {
+                alert('User not found. Please sign up first.');
+                return;
+            }
+
+            querySnapshot.forEach(doc => {
+                const userData = doc.data();
+                const hashedPassword = CryptoJS.SHA256(password).toString();
+                if (userData.password === hashedPassword) {
+                    alert('Sign in successful!');
+                    // Create session for the user (here, using localStorage)
+                    const userSession = {
+                        email: userData.email,
+                        username: userData.username,
+                        dob: userData.dob
+                    };
+                    localStorage.setItem('userSession', JSON.stringify(userSession));
+                    // Redirect to user profile upon successful sign-in
+                    window.location.href = 'userprofile.html';
+                } else {
+                    alert('Incorrect password. Please try again.');
+                }
+            });
+        } catch (error) {
+            console.error('Error signing in: ', error);
+            alert('Error signing in. Please try again.');
+        }
+    });
+</script>
+
+</body>
+</html>
